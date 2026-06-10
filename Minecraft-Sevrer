@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía Completa — Crear tu Servidor Minecraft</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@700;800&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg:     #06070c;
+    --s1:     #0a0c16;
+    --s2:     #0e1020;
+    --border: #171b2c;
+    --b2:     #1e2338;
+    --green:  #22d574;
+    --blue:   #4f8aff;
+    --yellow: #f0c040;
+    --purple: #a878f8;
+    --red:    #f06060;
+    --orange: #f09040;
+    --teal:   #30d0c0;
+    --text:   #c4cceb;
+    --muted:  #3c4468;
+    --dim:    #262a40;
+
+    --basic:  #22d574;
+    --mid:    #f0c040;
+    --adv:    #f06060;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.65;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0;
+    background: rgba(6,7,12,0.97);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    z-index: 300;
+    padding: 8px 12px;
+    display: flex; gap: 4px; flex-wrap: wrap; justify-content: center;
+  }
+  nav a {
+    color: var(--muted); text-decoration: none;
+    font-size: 0.67rem; font-family: 'JetBrains Mono', monospace;
+    padding: 3px 8px; border-radius: 4px;
+    border: 1px solid transparent; transition: all 0.15s;
+    white-space: nowrap;
+  }
+  nav a:hover { color: var(--text); border-color: var(--border); background: var(--s1); }
+  .nv { color: #22a055; }
+  .nm { color: #b09030; }
+  .na { color: #c04040; }
+
+  /* HERO */
+  header {
+    text-align: center; padding: 52px 16px 36px;
+    border-bottom: 1px solid var(--border);
+  }
+  .ver-badge {
+    display: inline-block;
+    background: #0a1a0a; border: 1px solid #206040;
+    color: var(--green); font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem; padding: 4px 14px; border-radius: 20px;
+    margin-bottom: 16px;
+  }
+  header h1 {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: clamp(1.6rem, 5vw, 2.6rem);
+    color: #dce4ff; margin-bottom: 8px;
+  }
+  header p { color: var(--muted); font-size: 0.83rem; }
+
+  /* LEVEL BADGES */
+  .lv-basic  { background: #041208; border: 1px solid #0c3018; color: var(--basic);  font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; padding: 2px 8px; border-radius: 3px; }
+  .lv-mid    { background: #181000; border: 1px solid #382808; color: var(--mid);    font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; padding: 2px 8px; border-radius: 3px; }
+  .lv-adv    { background: #180404; border: 1px solid #380808; color: var(--adv);    font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; padding: 2px 8px; border-radius: 3px; }
+
+  /* WRAP */
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 16px; }
+
+  /* PHASE BANNER */
+  .phase-banner {
+    padding: 36px 0 20px;
+    display: flex; align-items: flex-start; gap: 14px;
+  }
+  .ph-bar { flex: 1; height: 1px; background: var(--border); margin-top: 12px; }
+  .ph-content {}
+  .ph-badge {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    padding: 3px 10px; border-radius: 3px; margin-bottom: 6px;
+    display: inline-block;
+  }
+  .ph-basic  { background: #041208; border: 1px solid #0c3018; color: var(--basic); }
+  .ph-mid    { background: #181000; border: 1px solid #382808; color: var(--mid); }
+  .ph-adv    { background: #180404; border: 1px solid #380808; color: var(--adv); }
+  .ph-title {
+    font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800;
+    color: #dce4ff;
+  }
+  .ph-sub { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+  /* STEP */
+  .steps { display: flex; flex-direction: column; gap: 12px; }
+
+  .step {
+    display: flex; gap: 0;
+    border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  }
+
+  .step-side {
+    width: 44px; flex-shrink: 0;
+    display: flex; flex-direction: column;
+    align-items: center; padding: 16px 8px;
+    border-right: 1px solid var(--border);
+  }
+  .step-side.basic  { background: #030a06; }
+  .step-side.mid    { background: #0a0800; }
+  .step-side.adv    { background: #0a0303; }
+
+  .step-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem; font-weight: 700;
+  }
+  .basic .step-num  { color: var(--basic); }
+  .mid   .step-num  { color: var(--mid); }
+  .adv   .step-num  { color: var(--adv); }
+
+  .step-body {
+    flex: 1; padding: 16px 20px;
+    background: var(--s1);
+    display: flex; flex-direction: column; gap: 10px;
+  }
+
+  .step-head {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .step-title {
+    font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
+    color: #e0e8ff;
+  }
+
+  .step-content { font-size: 0.81rem; color: #6878a0; line-height: 1.6; }
+  .step-content strong { color: #b8c4e8; }
+  .step-content em { color: var(--muted); font-style: normal; }
+
+  /* CODE BLOCK */
+  .code {
+    background: #030407; border: 1px solid #0c1020;
+    border-radius: 6px; padding: 10px 14px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.73rem;
+    line-height: 1.9; overflow-x: auto;
+  }
+  .c-comment { color: #2a3550; }
+  .c-cmd     { color: var(--green); }
+  .c-path    { color: var(--blue); }
+  .c-val     { color: var(--yellow); }
+  .c-flag    { color: var(--purple); }
+  .c-warn    { color: var(--red); }
+  .c-label   { color: var(--muted); font-size: 0.68rem; margin-bottom: 4px; display: block; }
+
+  /* NOTE */
+  .note {
+    padding: 9px 13px; font-size: 0.78rem;
+    border-left: 3px solid var(--b2);
+    border-radius: 0 6px 6px 0;
+    background: #04050a; color: #506080; line-height: 1.5;
+  }
+  .note.ok     { border-color: var(--green);  background: #030a05; color: #307048; }
+  .note.warn   { border-color: var(--yellow); background: #090600; color: #807030; }
+  .note.info   { border-color: var(--blue);   background: #030610; color: #3a5880; }
+  .note.danger { border-color: var(--red);    background: #0a0303; color: #804040; }
+
+  /* GRID */
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 620px) { .grid { grid-template-columns: 1fr; } }
+  .grid.three { grid-template-columns: repeat(3,1fr); }
+  @media (max-width: 720px) { .grid.three { grid-template-columns: 1fr; } }
+
+  /* MINI CARD */
+  .mcard {
+    background: #07090f; border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 14px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .mcard-title { font-weight: 600; font-size: 0.84rem; color: #c8d4f0; }
+  .mcard-body  { font-size: 0.78rem; color: #506080; line-height: 1.5; }
+
+  /* VERSION TABLE */
+  .vtable { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+  .vtable th {
+    text-align: left; font-family: 'JetBrains Mono', monospace;
+    font-size: 0.64rem; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 1px; padding: 7px 10px; border-bottom: 1px solid var(--border);
+  }
+  .vtable td {
+    padding: 7px 10px; border-bottom: 1px solid #0a0d18;
+    vertical-align: top;
+  }
+  .vtable tr:last-child td { border-bottom: none; }
+  .vtable .hi { color: var(--green); font-weight: 600; }
+  .vtable .ok { color: #508060; }
+  .vtable .no { color: #604040; }
+  .vtable .muted { color: var(--muted); }
+
+  /* CHECKLIST */
+  .checklist { display: flex; flex-direction: column; gap: 5px; }
+  .check-item {
+    display: flex; gap: 8px; align-items: flex-start;
+    font-size: 0.8rem; color: #6878a0;
+  }
+  .check-box {
+    width: 16px; height: 16px; flex-shrink: 0;
+    border: 1px solid var(--dim); border-radius: 3px;
+    background: #070910; margin-top: 1px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.6rem; color: var(--green);
+  }
+
+  /* FOLDER TREE */
+  .tree {
+    background: #030407; border: 1px solid #0c1020;
+    border-radius: 6px; padding: 10px 14px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+    line-height: 1.9; color: #4a5878;
+  }
+  .tree .folder { color: var(--blue); }
+  .tree .file   { color: #506888; }
+  .tree .imp    { color: var(--yellow); }
+  .tree .note-t { color: #283040; }
+
+  /* PILLS */
+  .pills { display: flex; flex-wrap: wrap; gap: 5px; }
+  .pill  {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+    padding: 2px 8px; border-radius: 3px; border: 1px solid;
+    color: var(--teal); border-color: #082828; background: #030e0e;
+  }
+
+  footer {
+    text-align: center; padding: 40px 16px;
+    color: var(--muted); font-size: 0.73rem;
+    border-top: 1px solid var(--border); margin-top: 20px;
+  }
+
+  .divider { border-top: 1px solid var(--border); margin: 20px 0 0; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span style="color:var(--muted);font-size:0.65rem;padding:4px 4px;font-family:monospace">VER →</span>
+  <a href="#version">1.21.1</a>
+  <span style="color:var(--muted);font-size:0.65rem;padding:4px 2px">|</span>
+  <a href="#b1" class="nv">☁️ Hosting</a>
+  <a href="#b2" class="nv">⚙️ Java</a>
+  <a href="#b3" class="nv">📦 Paper</a>
+  <a href="#b4" class="nv">▶️ Primer arranque</a>
+  <a href="#b5" class="nv">🔧 server.properties</a>
+  <span style="color:var(--muted);font-size:0.65rem;padding:4px 2px">|</span>
+  <a href="#m1" class="nm">🔐 Auth</a>
+  <a href="#m2" class="nm">🎖️ LuckPerms</a>
+  <a href="#m3" class="nm">💬 EssentialsX</a>
+  <a href="#m4" class="nm">🗺️ WorldGuard</a>
+  <a href="#m5" class="nm">⛏️ FAWE</a>
+  <span style="color:var(--muted);font-size:0.65rem;padding:4px 2px">|</span>
+  <a href="#a1" class="na">🎙️ VoiceChat</a>
+  <a href="#a2" class="na">⚔️ McMMO</a>
+  <a href="#a3" class="na">🏰 Towny</a>
+  <a href="#a4" class="na">💻 CC:T</a>
+  <a href="#a5" class="na">🌌 Multiverse</a>
+  <a href="#a6" class="na">🤖 IA</a>
+</nav>
+
+<header>
+  <div class="ver-badge">✦ Versión recomendada: Minecraft Java 1.21.1 · Paper</div>
+  <h1>Guía Completa del Servidor</h1>
+  <p>Desde cero hasta avanzado · Paso a paso con explicaciones detalladas</p>
+</header>
+
+<!-- ══════ VERSIÓN ══════ -->
+<div id="version" class="wrap">
+  <div class="phase-banner">
+    <div>
+      <div class="ph-badge ph-basic">¿Por qué esta versión?</div>
+      <div class="ph-title">Minecraft Java 1.21.1 es la versión óptima</div>
+      <div class="ph-sub">Mayor compatibilidad de plugins maduros + mods activos + Paper optimizado</div>
+    </div>
+    <div class="ph-bar"></div>
+  </div>
+
+  <table class="vtable" style="margin-bottom:14px;">
+    <thead><tr><th>Versión</th><th>Plugins Paper</th><th>Mods Fabric</th><th>Estabilidad</th><th>Veredicto</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="muted">1.20.1</td>
+        <td class="ok">Muy alta</td>
+        <td class="ok">Alta</td>
+        <td class="ok">Muy estable</td>
+        <td class="muted">Válida, algo desactualizada</td>
+      </tr>
+      <tr>
+        <td style="color:#dce4ff;font-weight:700">1.21.1 ✦</td>
+        <td class="hi">Máxima activa</td>
+        <td class="hi">Muy alta</td>
+        <td class="hi">Estable + soporte activo</td>
+        <td class="hi">RECOMENDADA</td>
+      </tr>
+      <tr>
+        <td class="muted">1.21.4+</td>
+        <td class="ok">Alta pero incompleta</td>
+        <td class="ok">Moderada</td>
+        <td class="muted">Algunos mods sin port</td>
+        <td class="muted">Demasiado nueva aún</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note info">📌 <strong>1.21.1</strong> tiene Paper activo, LuckPerms, EssentialsX, Towny, McMMO, WorldGuard, FAWE, SkinsRestorer, Multiverse, TAB, DiscordSRV, Skript, BetonQuest, Simple Voice Chat (Fabric), CC:Tweaked (Fabric) y MythicMobs todos con versión 1.21.1 estable. Es el punto óptimo donde la mayoría de los mods que hablamos están disponibles.</div>
+</div>
+
+<!-- ══════════════════════════════════ -->
+<!-- BÁSICO -->
+<!-- ══════════════════════════════════ -->
+<div class="divider"></div>
+<div class="wrap">
+  <div class="phase-banner">
+    <div>
+      <div class="ph-badge ph-basic">Fase 1 — Básico</div>
+      <div class="ph-title">Infraestructura y primer arranque</div>
+      <div class="ph-sub">El servidor corriendo, accesible desde internet, con configuración inicial</div>
+    </div>
+    <div class="ph-bar"></div>
+  </div>
+</div>
+
+<div class="wrap">
+<div class="steps">
+
+<!-- PASO B1 -->
+<div id="b1" class="step">
+  <div class="step-side basic"><div class="step-num">B1</div></div>
+  <div class="step-body">
+    <div class="step-head">
+      <div class="step-title">☁️ Elegir dónde hospedar el servidor</div>
+      <span class="lv-basic">BÁSICO</span>
+    </div>
+    <div class="step-content">
+      Tenés tres opciones reales para hostear el servidor:<br><br>
+      <strong>Opción A — VPS (recomendado para un servidor serio):</strong><br>
+      Un VPS es una computadora virtual en un datacenter. Siempre está prendida, tiene IP fija, y podés instalar lo que quieras. Proveedores recomendados para Argentina/Latam: <strong>Hostinger VPS</strong> (barato, buen soporte en español), <strong>Oracle Cloud Free Tier</strong> (tiene un VPS gratuito de 4 núcleos y 24GB RAM, ideal para empezar). Para un servidor con 20-30 jugadores necesitás mínimo <strong>4 núcleos y 8GB RAM</strong>.<br><br>
+      <strong>Opción B — Hosting especializado de Minecraft:</strong><br>
+      Servicios como <strong>Aternos</strong> (gratuito pero limitado), <strong>Bisect Hosting</strong>, o <strong>Apex Hosting</strong>. Más fáciles pero menos control. Aternos no soporta mods Fabric bien ni configuraciones avanzadas.<br><br>
+      <strong>Opción C — Tu propia PC:</strong><br>
+      Válido para empezar, pero requiere IP fija o Dynamic DNS, y la PC debe estar prendida siempre. Útil para desarrollo/pruebas, no para producción.
+    </div>
+    <div class="note info">Para este proyecto con todos los sistemas que querés, recomiendo <strong>VPS mínimo 6GB RAM / 4 cores</strong>. Oracle Cloud Free Tier da exactamente eso gratis.</div>
+  </div>
+</div>
+
+<!-- PASO B2 -->
+<div id="b2" class="step">
+  <div class="step-side basic"><div class="step-num">B2</div></div>
+  <div class="step-body">
+    <div class="step-head">
+      <div class="step-title">☕ Instalar Java 21</div>
+      <span class="lv-basic">BÁSICO</span>
+    </div>
+    <div class="step-content">
+      Minecraft 1.21.1 requiere <strong>Java 21</strong> obligatoriamente. No Java 8, no Java 17. Java 21.<br><br>
+      <strong>En Linux (VPS Ubuntu/Debian) — comandos en terminal:</strong>
+    </div>
+    <div class="code">
+      <span class="c-comment"># Actualizar el sistema primero</span><br>
+      <span class="c-cmd">sudo apt update && sudo apt upgrade -y</span><br><br>
+      <span class="c-comment"># Instalar Java 21 (OpenJDK)</span><br>
+      <span class="c-cmd">sudo apt install openjdk-21-jdk -y</span><br><br>
+      <span class="c-comment"># Verificar la instalación</span><br>
+      <span class="c-cmd">java -version</span><br>
+      <span class="c-comment"># Debe decir: openjdk version "21.x.x"</span>
+    </div>
+    <div class="step-content" style="margin-top:6px;">
+      <strong>En Windows:</strong> descargar el instalador de <em>adoptium.net</em> → Temurin 21 → instalar con permisos de admin. Verificar con <code style="background:#0a0c18;padding:1px 5px;border-radius:3px;font-family:monospace">java -version</code> en CMD.
+    </div>
+    <div class="note warn">⚠️ Muchos errores de inicio del servidor son por tener Java 17 o Java 8. Siempre verificar la versión antes de continuar.</div>
+  </div>
+</div>
+
+<!-- PASO B3 -->
+<div id="b3" class="step">
+  <div class="step-side basic"><div class="step-num">B3</div></div>
+  <div class="step-body">
+    <div class="step-head">
+      <div class="step-title">📦 Descargar e instalar Paper 1.21.1</div>
+      <span class="lv-basic">BÁSICO</span>
+    </div>
+    <div class="step-content">
+      Paper es el fork de Spigot con las optimizaciones que mencionamos. <strong>No usar Vanilla ni CraftBukkit.</strong>
+    </div>
+    <div class="code">
+      <span class="c-comment"># Crear carpeta del servidor</span><br>
+      <span class="c-cmd">mkdir ~/servidor && cd ~/servidor</span><br><br>
+      <span class="c-comment"># Descargar Paper 1.21.1 (última build)</span><br>
+      <span class="c-comment"># Ir a: https://papermc.io/downloads/paper</span><br>
+      <span class="c-comment"># Seleccionar 1.21.1 → Download → copiar link directo</span><br>
+      <span class="c-cmd">wget -O paper.jar "https://api.papermc.io/v2/projects/paper/versions/1.21.1/builds/ULTIMO/downloads/paper-1.21.1-ULTIMO.jar"</span><br><br>
+      <span class="c-comment"># Renombrar para facilitar el script</span><br>
+      <span class="c-cmd">mv paper*.jar server.jar</span>
+    </div>
+    <div class="step-content" style="margin-top:6px;">
+      <strong>En Windows:</strong> descargar el .jar desde papermc.io/downloads/paper, crear una carpeta <em>C:\servidor</em> y poner el .jar ahí.
+    </div>
+  </div>
+</div>
+
+<!-- PASO B4 -->
+<div id="b4" class="step">
+  <div class="step-side basic"><div class="step-num">B4</div></div>
+  <div class="step-body">
+    <div class="step-head">
+      <div class="step-title">▶️ Script de inicio + primer arranque</div>
+      <span class="lv-basic">BÁSICO</span>
+    </div>
+    <div class="step-content">
+      Crear el script de arranque con las <strong>Aikar's Flags</strong> — flags de JVM optimizadas para Minecraft. Estas reducen los "garbage collection pauses" (congelones) significativamente.
+    </div>
+    <div class="code">
+      <span class="c-comment"># Crear el script de inicio (Linux)</span><br>
+      <span class="c-cmd">nano start.sh</span><br><br>
+      <span class="c-comment"># Pegar esto dentro del archivo:</span><br>
+      <span class="c-flag">#!/bin/bash</span><br>
+      <span class="c-cmd">java -Xms4G -Xmx8G \</span><br>
+      <span class="c-flag">&nbsp; -XX:+UseG1GC \</span><br>
+      <span class="c-flag">&nbsp; -XX:+ParallelRefProcEnabled \</span><br>
+      <span class="c-flag">&nbsp; -XX:MaxGCPauseMillis=200 \</span><br>
+      <span class="c-flag">&nbsp; -XX:+UnlockExperimentalVMOptions \</span><br>
+      <span class="c-flag">&nbsp; -XX:+DisableExplicitGC \</span><br>
+      <span class="c-flag">&nbsp; -XX:+AlwaysPreTouch \</span><br>
+      <span class="c-flag">&nbsp; -XX:G1NewSizePercent=30 \</span><br>
+      <span class="c-flag">&nbsp; -XX:G1MaxNewSizePercent=40 \</span><br>
+      <span class="c-flag">&nbsp; -XX:G1HeapRegionSize=8M \</span><br>
+      <span class="c-flag">&nbsp; -XX:G1ReservePercent=20 \</span><br>
+      <span class="c-flag">&nbsp; -XX:G1HeapWastePercent=5 \</span><br>
+      <span class="c-flag">&nbsp; -XX:G1MixedGCCountTarget=4 \</span><br>
+      <span class="c-flag">&nbsp; -XX:InitiatingHeapOccupancyPercent=15 \</span><br>
+      <span class="c-flag">&nbsp; -XX:G1MixedGCLiveThresholdPercent=90 \</span><br>
+      <span class="c-flag">&nbsp; -XX:G1RSetUpdatingPauseTimePercent=5 \</span><br>
+      <span class="c-flag">&nbsp; -XX:SurvivorRatio=32 \</span><br>
+      <span class="c-flag">&nbsp; -XX:+PerfDisableSharedMem \</span><br>
+      <span class="c-flag">&nbsp; -XX:MaxTenuringThreshold=1 \</span><br>
+      <span class="c-cmd">&nbsp; -jar server.jar --nogui</span><br><br>
+      <span class="c-comment"># Guardar (Ctrl+O, Enter, Ctrl+X) y dar permisos</span><br>
+      <span class="c-cmd">chmod +x start.sh</span><br><br>
+      <span class="c-comment"># Primer arranque (va a fallar — es normal)</span><br>
+      <span class="c-cmd">./start.sh</span>
+    </div>
+    <div class="step-content" style="margin-top:6px;">
+      El primer arranque genera el archivo <strong>eula.txt</strong> y se cierra. Eso es correcto.
+    </div>
+    <div class="code">
+      <span class="c-comment"># Aceptar el EULA</span><br>
+      <span class="c-cmd">nano eula.txt</span><br>
+      <span class="c-comment"># Cambiar: eula=false → eula=true</span><br>
+      <span class="c-comment"># Guardar y salir</span><br><br>
+      <span class="c-comment"># Segundo arranque — ahora sí genera el mundo</span><br>
+      <span class="c-cmd">./start.sh</span>
+    </div>
+    <div class="note ok">✦ Si ves "Done (X.Xs)! For help, type 'help'" el servidor está corriendo. Podés escribir comandos directamente en esa terminal.</div>
+  </div>
+</div>
+
+<!-- PASO B5 -->
+<div id="b5" class="step">
+  <div class="step-side basic"><div class="step-num">B5</div></div>
+  <div class="step-body">
+    <div class="step-head">
+      <div class="step-title">🔧 Configurar server.properties</div>
+      <span class="lv-basic">BÁSICO</span>
+    </div>
+    <div class="step-content">
+      Este archivo controla el comportamiento base del servidor. Se crea automáticamente. Editarlo antes de que entre el primer jugador.
+    </div>
+    <div class="code">
+      <span class="c-cmd">nano server.properties</span>
+    </div>
+    <div class="code" style="margin-top:8px;">
+      <span class="c-comment"># ── CONFIGURACIONES IMPORTANTES ──</span><br><br>
+
+      <span class="c-comment"># Nombre visible en la lista de servidores</span><br>
+      <span class="c-val">motd=\u00a76[ServidorRPG] \u00a7fBienvenido</span><br><br>
+
+      <span class="c-comment"># Puerto (25565 por defecto, abrir en firewall)</span><br>
+      <span class="c-val">server-port=25565</span><br><br>
+
+      <span class="c-comment"># Modo online: true = requiere cuenta Mojang legítima</span><br>
+      <span class="c-comment"># false = acepta cuentas sin licencia (necesita AuthMe)</span><br>
+      <span class="c-val">online-mode=false</span><br><br>
+
+      <span class="c-comment"># Máximo de jugadores simultáneos</span><br>
+      <span class="c-val">max-players=50</span><br><br>
+
+      <span class="c-comment"># CRÍTICO: reducir de 10 a 6 para menos lag</span><br>
+      <span class="c-val">view-distance=6</span><br><br>
+
+      <span class="c-comment"># Distancia de simulación (mobs, redstone, tick)</span><br>
+      <span class="c-val">simulation-distance=4</span><br><br>
+
+      <span class="c-comment"># Spawn de mobs por defecto</span><br>
+      <span class="c-val">spawn-monsters=true</span><br>
+      <span class="c-val">spawn-animals=true</span><br><br>
+
+      <span class="c-comment"># Dificultad: peaceful, easy, normal, hard</span><br>
+      <span class="c-val">difficulty=normal</span><br><br>
+
+      <span class="c-comment"># Modo de juego por defecto para nuevos jugadores</span><br>
+      <span class="c-val">gamemode=survival</span><br><br>
+
+      <span class="c-comment"># Whitelist: true = solo jugadores aprobados pueden entrar</span><br>
+      <span class="c-val">white-list=false</span>
+    </div>
+    <div class="note warn">⚠️ Si ponés <strong>online-mode=false</strong>, necesitás instalar AuthMe obligatoriamente antes de abrir al público. Sin AuthMe, cualquiera puede entrar con el nick de otro jugador.</div>
+  </div>
+</div>
+
+<!-- PASO B6 -->
+<div class="step">
+  <div class="step-side basic"><div class="step-num">B6</div></div>
+  <div class="step-body">
+    <div class="step-head">
+      <div class="step-title">🌐 Abrir el puerto en el firewall</div>
+      <span class="lv-basic">BÁSICO</span>
+    </div>
+    <div class="step-content">
+      Por defecto, el VPS bloquea las conexiones entrantes. Hay que abrir el puerto 25565 (TCP) para que los jugadores puedan conectarse.
+    </div>
+    <div class="code">
+      <span class="c-comment"># Ubuntu/Debian con UFW</span><br>
+      <span class="c-cmd">sudo ufw allow 25565/tcp</span><br>
+      <span class="c-cmd">sudo ufw allow 25565/udp</span><br>
+      <span class="c-cmd">sudo ufw enable</span><br>
+      <span class="c-cmd">sudo ufw status</span><br><br>
+      <span class="c-comment"># Si usás Oracle Cloud, también abrir en su panel web:</span><br>
+      <span class="c-comment"># Networking → Virtual Cloud Network → Security Lists → Add Rule</span><br>
+      <span class="c-comment"># Destination Port: 25565, Protocol: TCP</span>
+    </div>
+    <div class="step-content" style="margin-top:6px;">
+      Para conectarse al servidor desde el cliente de Minecraft usar la <strong>IP pública</strong> del VPS (la que te da el proveedor). Si es en tu propia PC, usar tu IP pública + configurar port forwarding en el router.
+    </div>
+    <div class="code">
+      <span class="c-comment"># Ver tu IP pública del VPS</span><br>
+      <span class="c-cmd">curl ifconfig.me</span>
+    </div>
+  </div>
+</div>
+
+<!-- PASO B7 — Estructura -->
+<div class="step">
+  <div class="step-side basic"><div class="step-num">B7</div></div>
+  <div class="step-body">
+    <div class="step-head">
+      <div class="step-title">📁 Estructura de carpetas del servidor</div>
+      <span class="lv-basic">BÁSICO</span>
+    </div>
+    <div class="step-content">
+      Después del primer arranque exitoso, la carpeta del servidor se ve así. Importa saber dónde va cada cosa.
+    </div>
+    <div class="tree">
+      <span class="folder">servidor/</span><br>
+      <span class="folder">├── plugins/</span>     <span class="note-t">← AQUÍ van todos los plugins (.jar)</span><br>
+      <span class="folder">│   ├── LuckPerms/</span>  <span class="note-t">← config de cada plugin en su carpeta</span><br>
+      <span class="folder">│   └── Essentials/</span><br>
+      <span class="folder">├── world/</span>          <span class="note-t">← Mundo principal (Overworld)</span><br>
+      <span class="folder">├── world_nether/</span>  <span class="note-t">← Nether</span><br>
+      <span class="folder">├── world_the_end/</span> <span class="note-t">← The End</span><br>
+      <span class="imp">├── server.properties</span>  <span class="note-t">← Configuración base</span><br>
+      <span class="imp">├── paper.yml</span>          <span class="note-t">← Config avanzada de Paper</span><br>
+      <span class="imp">├── spigot.yml</span>         <span class="note-t">← Config de Spigot (herencia)</span><br>
+      <span class="file">├── start.sh</span>           <span class="note-t">← Tu script de inicio</span><br>
+      <span class="file">├── server.jar</span>         <span class="note-t">← El jar de Paper</span><br>
+      <span class="file">├── eula.txt</span>           <span class="note-t">← EULA aceptado</span><br>
+      <span class="file">└── logs/</span>              <span class="note-t">← Logs de consola</span>
+    </div>
+    <div class="note info">📌 Los mods de Fabric NO van en plugins/. Si usás mods Fabric, necesitás el servidor Fabric. Los plugins de Paper van en plugins/, los mods Fabric van en mods/. Son sistemas distintos.</div>
+  </div>
+</div>
+
+</div><!-- /steps -->
+</div><!-- /wrap basico -->
+
+<!-- ══════════════════════════════════ -->
+<!-- MEDIO -->
+<!-- ══════════════════════════════════ -->
+<div class="divider"></div>
+<div class="wrap">
+  <div class="phase-banner">
+    <div>
+      <div class="ph-badge ph-mid">Fase 2 — Medio</div>
+      <div class="ph-title">Plugins esenciales y configuración del núcleo</div>
+      <div class="ph-sub">LuckPerms · AuthMe · EssentialsX · WorldGuard · FAWE · TAB · Skript</div>
+    </div>
+    <div class="ph-bar"></div>
+  </div>
+</div>
+
+<div class="wrap">
+<div class="steps">
+
+<!-- M1 AuthMe -->
+<div id="m1" class="step">
+  <div class="step-side mid"><div class="step-num">M1</div></div>
+  <div class="step-body">
+    <div class="step-head">
+      <div class="step-title">🔐 Instalar AuthMe Reloaded</div>
+      <span class="lv-mid">MEDIO</span>
+    </div>
+    <div class="step-content">
+      <strong>¿Cómo se instalan los plugins?</strong> Siempre igual: descargar el .jar del plugin → copiarlo en la carpeta <em>plugins/</em> → reiniciar el servidor. El servidor lo detecta automáticamente y crea su carpeta de configuración.<br><br>
+      Descargar AuthMe desde <strong>spigotmc.org</strong> buscando "AuthMe Reloaded".
+    </div>
+    <div class="code">
+      <span class="c-comment"># Poner el .jar en la carpeta plugins</span><br>
+      <span class="c-cmd">cp AuthMe.jar ~/servidor/plugins/</span><br><br>
+      <span class="c-comment"># Reiniciar el servidor (desde la consola del servidor)</span><br>
+      <span class="c-cmd">stop</span><br>
+      <span class="c-cmd">./start.sh</span>
+    </div>
+    <div class="step-content" style="margin-top:6px;">
+      Después del reinicio, editar <em>plugins/AuthMe/config.yml</em>:
+    </div>
+    <div class="code">
+      <span class="c-comment"># plugins/AuthMe/config.yml — claves importantes</span><br><br>
+      <span class="c-val">DataSource:</span><br>
+      <span class="c-val">&nbsp; backend: SQLITE</span>  <span class="c-comment"># básico, sirve para empezar</span><br><br>
+      <span class="c-val">settings:</span><br>
+      <span class="c-val">&nbsp; sessions:</span><br>
+      <span class="c-val">&nbsp;&nbsp;&nbsp; enabled: true</span><br>
+      <span class="c-val">&nbsp;&nbsp;&nbsp; timeout: 12</span>  <span class="c-comment"># horas antes de pedir login de nuevo</span><br><br>
+      <span class="c-val">&nbsp; security:</span><br>
+      <span class="c-val">&nbsp;&nbsp;&nbsp; passwordMinLength: 5</span><br>
+      <span class="c-val">&nbsp;&nbsp;&nbsp; passwordMaxLength: 30</span><br>
+      <span class="c-val">&nbsp;&nbsp;&nbsp; hashAlgorithm: BCRYPT</span>  <span class="c-comment"># el más seguro</span>
+    </div>
+    <div class="note ok">✦ Ahora cuando alguien entra por primera vez, no puede moverse hasta usar /register. En siguientes ingresos, /login. Si está en la misma IP, las sesiones lo loguean automáticamente.</div>
+  </div>
+</div>
+
+<!-- M2 LuckPerms -->
+<div id="m2" class="step">
+  <div class="step-side mid"><div class="step-num">M2</div></div>
+  <div class="step-body">
+    <div class="step-head">
+      <div class="step-title">🎖️ Instalar y configurar LuckPerms</div>
+      <span class="lv-mid">MEDIO</span>
+    </div>
+    <div class="step-content">
+      Descargar desde <strong>luckperms.net</strong> → versión Bukkit/Paper. Instalar como cualquier plugin.<br><br>
+      LuckPerms se configura principalmente desde la <strong>interfaz web</strong> en <em>editor.luckperms.net</em> o con comandos en consola. Acá los comandos base:
+    </div>
+    <div class="code">
+      <span class="c-comment"># En la consola del servidor (sin el /)</span><br><br>
+      <span class="c-comment"># Crear grupos</span><br>
+      <span class="c-cmd">lp creategroup visitante</span><br>
+      <span class="c-cmd">lp creategroup miembro</span><br>
+      <span class="c-cmd">lp creategroup estudiante</span><br>
+      <span class="c-cmd">lp creategroup senior</span><br>
+      <span class="c-cmd">lp creategroup admin</span><br>
+      <span class="c-cmd">lp creategroup owner</span><br><br>
+
+      <span class="c-comment"># Dar permiso a un grupo</span><br>
+      <span class="c-cmd">lp group miembro permission set essentials.home true</span><br>
+      <span class="c-cmd">lp group miembro permission set essentials.tpa true</span><br>
+      <span class="c-cmd">lp group estudiante permission set essentials.fly true</span><br><br>
+
+      <span class="c-comment"># Hacer que miembro herede permisos de visitante</span><br>
+      <span class="c-cmd">lp group miembro parent add visitante</span><br>
+      <span class="c-cmd">lp group estudiante parent add miembro</span><br>
+      <span class="c-cmd">lp group senior parent add estudiante</span><br><br>
+
+      <span class="c-comment"># Asignar grupo por defecto a jugadores nuevos</span><br>
+      <span class="c-cmd">lp group visitante setdefault 100</span><br><br>
+
+      <span class="c-comment"># Asignar grupo a un jugador específico</span><br>
+      <span class="c-cmd">lp user Konan set group owner</span>
+    </div>
+    <div class="note info">📌 El peso de grupo (setdefault 100) determina qué grupo se aplica si hay conflicto. Mayor número = mayor prioridad.</div>
+  </div>
+</div>
+
+<!-- M3 EssentialsX -->
+<div id="m3" class="step">
+  <div class="step-side mid"><div class="step-num">M3</div></div>
+  <div class="step-body">
+    <div class="step-head">
+      <div class="step-title">💬 Instalar EssentialsX</div>
+      <span class="lv-mid">MEDIO</span>
+    </div>
+    <div class="step-content">
+      EssentialsX es un conjunto de plugins. Descargar todos desde <strong>essentialsx.net</strong>:<br>
+      <strong>EssentialsX</strong> (principal) + <strong>EssentialsXChat</strong> (formato del chat) + <strong>EssentialsXSpawn</strong> (spawn al entrar).
+    </div>
+    <div class="code">
+      <span class="c-comment"># plugins/Essentials/config.yml — partes importantes</span><br><br>
+
+      <span class="c-comment"># Formato del chat con rango</span><br>
+      <span class="c-val">chat:</span><br>
+      <span class="c-val">&nbsp; format: '&lt;{DISPLAYNAME}&gt; {MESSAGE}'</span><br>
+      <span class="c-comment"># Con PlaceholderAPI para mostrar rango:</span><br>
+      <span class="c-val">&nbsp; format: '{PREFIX} &amp;7{DISPLAYNAME}&amp;r: {MESSAGE}'</span><br><br>
+
+      <span class="c-comment"># Spawn de nuevos jugadores</span><br>
+      <span class="c-val">newbies:</span><br>
+      <span class="c-val">&nbsp; teleport: spawn</span><br>
+      <span class="c-val">&nbsp; kit: ''</span><br><br>
+
+      <span class="c-comment"># Moneda del servidor</span><br>
+      <span class="c-val">economy:</span><br>
+      <span class="c-val">&nbsp; currency-symbol: '$'</span><br>
+      <span class="c-val">&nbsp; starting-balance: 500</span>
+    </div>
+    <div class="note ok">✦ Después de instalar EssentialsXChat, el formato del chat usa el prefix que definiste en LuckPerms. Reiniciar el servidor para que cargue la integración.</div>
+  </div>
+</div>
+
+<!-- M4 WorldGuard -->
+<div id="m4" class="step">
+  <div class="step-side mid"><div class="step-num">M4</div></div>
+  <div class="step-body">
+    <div class="step-head">
+      <div class="step-title">🗺️ WorldGuard + WorldEdit (base)</div>
+      <span class="lv-mid">MEDIO</span>
+    </div>
+    <div class="step-content">
+      WorldGuard necesita WorldEdit instalado. Descargar ambos desde <strong>enginehub.org</strong>.<br><br>
+      WorldGuard protege regiones. WorldEdit selecciona áreas. Ambos van en plugins/.
+    </div>
+    <div class="code">
+      <span class="c-comment"># En el juego, con vara de madera seleccionar región:</span><br>
+      <span class="c-cmd">/wand</span>  <span class="c-comment"># te da la vara de WorldEdit</span><br>
+      <span class="c-comment"># Click izquierdo: primera esquina</span><br>
+      <span class="c-comment"># Click derecho: segunda esquina</span><br><br>
+
+      <span class="c-comment"># Crear región protegida</span><br>
+      <span class="c-cmd">/rg define spawn</span>  <span class="c-comment"># nombre de la región</span><br>
+      <span class="c-cmd">/rg flag spawn pvp deny</span>  <span class="c-comment"># sin PvP en spawn</span><br>
+      <span class="c-cmd">/rg flag spawn build deny</span>  <span class="c-comment"># nadie puede construir</span><br><br>
+
+      <span class="c-comment"># Dar acceso de construcción a un grupo</span><br>
+      <span class="c-cmd">/rg addmember spawn g:admin</span>  <span class="c-comment"># grupo admin puede</span><br><br>
+
+      <span class="c-comment"># Región exclusiva Owner (nadie más puede modificar)</span><br>
+      <span class="c-cmd">/rg define zona-owner</span><br>
+      <span class="c-cmd">/rg flag zona-owner build deny</span><br>
+      <span class="c-cmd">/rg setpriority zona-owner 100</span><br>
+      <span class="c-comment"># Solo agregar al owner como member de esa región</span><br>
+      <span class="c-cmd">/rg addmember zona-owner TuNickOwner</span>
+    </div>
+  </div>
+</div>
+
+<!-- M5 FAWE -->
+<div id="m5" class="step">
+  <div class="step-side mid"><div class="step-num">M5</div></div>
+  <div class="step-body">
+    <div class="step-head">
+      <div class="step-title">⛏️ FastAsyncWorldEdit (FAWE)</div>
+      <span class="lv-mid">MEDIO</span>
+    </div>
+    <div class="step-content">
+      FAWE reemplaza al WorldEdit normal. <strong>No instalar ambos juntos.</strong> Descargar desde <strong>modrinth.com</strong> buscando "FastAsyncWorldEdit" versión 1.21.1.
+    </div>
+    <div class="code">
+      <span class="c-comment"># Comandos básicos de FAWE más usados</span><br><br>
+      <span class="c-cmd">//sel</span>  <span class="c-comment"># seleccionar modo (cubo, polígono, etc)</span><br>
+      <span class="c-cmd">//set stone</span>  <span class="c-comment"># rellenar selección con piedra</span><br>
+      <span class="c-cmd">//copy</span>  <span class="c-comment"># copiar selección</span><br>
+      <span class="c-cmd">//paste</span>  <span class="c-comment"># pegar copia</span><br>
+      <span class="c-cmd">//undo</span>  <span class="c-comment"># deshacer última operación</span><br>
+      <span class="c-cmd">//brush sphere stone 3</span>  <span class="c-comment"># pincel esférico de radio 3</span><br>
+      <span class="c-cmd">//schem save nombre</span>  <span class="c-comment"># guardar schematic</span><br>
+      <span class="c-cmd">//schem load nombre</span>  <span class="c-comment"># cargar schematic</span>
+    </div>
+    <div class="note info">📌 Los schematics (construcciones guardadas) se guardan en plugins/FastAsyncWorldEdit/schematics/ y se pueden compartir entre servidores.</div>
+  </div>
+</div>
+
+<!-- M6 PlaceholderAPI + TAB -->
+<div class="step">
+  <div class="step-side mid"><div class="step-num">M6</div></div>
+  <div class="step-body">
+    <div class="step-head">
+      <div class="step-title">📊 PlaceholderAPI + TAB Plugin</div>
+      <span class="lv-mid">MEDIO</span>
+    </div>
+    <div class="step-content">
+      <strong>PlaceholderAPI</strong> es la "traducción" entre plugins: le permite a TAB mostrar el dinero de Vault, el rango de LuckPerms, las skills de McMMO, etc. Instalar ambos.
+    </div>
+    <div class="code">
+      <span class="c-comment"># Instalar extensiones de PlaceholderAPI (en consola del servidor)</span><br>
+      <span class="c-cmd">/papi ecloud download Essentials</span><br>
+      <span class="c-cmd">/papi ecloud download LuckPerms</span><br>
+      <span class="c-cmd">/papi ecloud download Vault</span><br>
+      <span class="c-cmd">/papi ecloud download Player</span><br>
+      <span class="c-cmd">/papi reload</span><br><br>
+
+      <span class="c-comment"># Ejemplo de uso en TAB (plugins/TAB/config.yml)</span><br>
+      <span class="c-val">tablist-name-formatting:</span><br>
+      <span class="c-val">&nbsp; enabled: true</span><br>
+      <span class="c-val">&nbsp; format: '%luckperms_prefix%%player_name%'</span><br><br>
+
+      <span class="c-val">scoreboard:</span><br>
+      <span class="c-val">&nbsp; enabled: true</span><br>
+      <span class="c-val">&nbsp; lines:</span><br>
+      <span class="c-val">&nbsp;&nbsp;&nbsp; 1: '&amp;6Servidor RPG'</span><br>
+      <span class="c-val">&nbsp;&nbsp;&nbsp; 2: ''</span><br>
+      <span class="c-val">&nbsp;&nbsp;&nbsp; 3: '&amp;7Rango: %luckperms_primary_group_name%'</span><br>
+      <span class="c-val">&nbsp;&nbsp;&nbsp; 4: '&amp;7Dinero: $%vault_eco_balance%'</span>
+    </div>
+  </div>
+</div>
+
+<!-- M7 Skript -->
+<div class="step">
+  <div class="step-side mid"><div class="step-num">M7</div></div>
+  <div class="step-body">
+    <div class="step-head">
+      <div class="step-title">📜 Instalar Skript</div>
+      <span class="lv-mid">MEDIO</span>
+    </div>
+    <div class="step-content">
+      Skript es el motor de scripts del servidor. Todo el comportamiento personalizado (exámenes, ascensos de rango, recompensas, comandos custom) vive aquí. Descargar desde <strong>github.com/SkriptLang/Skript</strong>.
+    </div>
+    <div class="code">
+      <span class="c-comment"># Los scripts van en plugins/Skript/scripts/</span><br>
+      <span class="c-comment"># Crear un script de ejemplo: ascenso.sk</span><br><br>
+      <span class="c-val">command /rankup:</span><br>
+      <span class="c-val">&nbsp; trigger:</span><br>
+      <span class="c-val">&nbsp;&nbsp;&nbsp; if player's group is "visitante":</span><br>
+      <span class="c-val">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; set player's group to "miembro"</span><br>
+      <span class="c-val">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; send "&amp;aAscendiste a Miembro!" to player</span><br>
+      <span class="c-val">&nbsp;&nbsp;&nbsp; else:</span><br>
+      <span class="c-val">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; send "&amp;cNo cumplís los requisitos." to player</span><br><br>
+
+      <span class="c-comment"># Recargar scripts sin reiniciar el servidor</span><br>
+      <span class="c-cmd">sk reload all</span>
+    </div>
+    <div class="note info">📌 Los archivos .sk van en plugins/Skript/scripts/. Podés tener múltiples archivos, uno por sistema. Se recargan en vivo con /sk reload.</div>
+  </div>
+</div>
+
+</div><!-- /steps -->
+</div><!-- /wrap medio -->
+
+<!-- ══════════════════════════════════ -->
+<!-- AVANZADO -->
+<!-- ══════════════════════════════════ -->
+<div class="divider"></div>
+<div class="wrap">
+  <div class="phase-banner">
+    <div>
+      <div class="ph-badge ph-adv">Fase 3 — Avanzado</div>
+      <div class="ph-title">Sistemas complejos y personalización profunda</div>
+      <div class="ph-sub">Voice Chat · McMMO · Towny · CC:Tweaked · Multiverse · IA · Optimización final</div>
+    </div>
+    <div class="ph-bar"></div>
+  </div>
+</div>
+
+<div class="wrap">
+<div class="steps">
+
+<!-- A1 Voice Chat -->
+<div id="a1" class="step">
+  <div class="step-side adv"><div class="step-num">A1</div></div>
+  <div class="step-body">
+    <div class="step-head">
+      <div class="step-title">🎙️ Simple Voice Chat (Fabric)</div>
+      <span class="lv-adv">AVANZADO</span>
+    </div>
+    <div class="step-content">
+      Simple Voice Chat es un <strong>mod Fabric</strong>, no un plugin de Paper. Requiere que el servidor también corra Fabric. Acá dos opciones:<br><br>
+      <strong>Opción A (recomendada):</strong> Servidor Paper para los plugins, y Simple Voice Chat tiene una versión <strong>Bukkit/Paper</strong> que funciona sin Fabric.<br>
+      <strong>Opción B:</strong> Servidor Fabric puro para los mods, sin plugins de Paper.
+    </div>
+    <div class="code">
+      <span class="c-comment"># Instalar la versión Bukkit de Simple Voice Chat</span><br>
+      <span class="c-comment"># Descargar desde modrinth.com → "Simple Voice Chat" → Bukkit</span><br>
+      <span class="c-cmd">cp voicechat-bukkit-*.jar ~/servidor/plugins/</span><br><br>
+
+      <span class="c-comment"># Abrir el puerto UDP del voice chat en el firewall</span><br>
+      <span class="c-cmd">sudo ufw allow 24454/udp</span><br><br>
+
+      <span class="c-comment"># plugins/voicechat/voicechat-server.properties</span><br>
+      <span class="c-val">port=24454</span><br>
+      <span class="c-val">max_voice_distance=48.0</span>  <span class="c-comment"># bloques de alcance</span><br>
+      <span class="c-val">crouch_distance_multiplier=0.5</span>  <span class="c-comment"># susurro al agacharse</span>
+    </div>
+    <div class="note warn">⚠️ Los jugadores también necesitan instalar el mod Simple Voice Chat en su cliente (versión Fabric para cliente). Sin el mod en cliente, no escuchan nada.</div>
+  </div>
+</div>
+
+<!-- A2 McMMO -->
+<div id="a2" class="step">
+  <div class="step-side adv"><div class="step-num">A2</div></div>
+  <div class="step-body">
+    <div class="step-head">
+      <div class="step-title">⚔️ McMMO — Skills y habilidades RPG</div>
+      <span class="lv-adv">AVANZADO</span>
+    </div>
+    <div class="step-content">
+      Descargar desde <strong>spigotmc.org</strong> → "mcMMO". Instalar como plugin normal. Después de instalarlo, editar <em>plugins/mcMMO/config.yml</em>:
+    </div>
+    <div class="code">
+      <span class="c-comment"># Activar/desactivar skills específicas</span><br>
+      <span class="c-val">Skills:</span><br>
+      <span class="c-val">&nbsp; Acrobatics:</span><br>
+      <span class="c-val">&nbsp;&nbsp;&nbsp; Enabled: true</span><br>
+      <span class="c-val">&nbsp; Mining:</span><br>
+      <span class="c-val">&nbsp;&nbsp;&nbsp; Enabled: true</span><br>
+      <span class="c-val">&nbsp; Combat:</span><br>
+      <span class="c-val">&nbsp;&nbsp;&nbsp; Enabled: true</span><br><br>
+
+      <span class="c-comment"># Velocidad de subida de nivel (multiplicador)</span><br>
+      <span class="c-val">General:</span><br>
+      <span class="c-val">&nbsp; xpMultiplier: 1.0</span>  <span class="c-comment"># 2.0 = doble XP</span><br><br>
+
+      <span class="c-comment"># Usar McMMO en Skript para requisito de rango</span><br>
+      <span class="c-val">if mcmmo level of player in "Mining" >= 50:</span><br>
+      <span class="c-val">&nbsp; # dar rango Guerrero</span>
+    </div>
+    <div class="note info">📌 Los niveles de McMMO se consultan con PlaceholderAPI: <code style="font-family:monospace;background:#0a0c18;padding:1px 4px">%mcmmo_level_mining%</code>, <code style="font-family:monospace;background:#0a0c18;padding:1px 4px">%mcmmo_power_level%</code> etc.</div>
+  </div>
+</div>
+
+<!-- A3 Towny -->
+<div id="a3" class="step">
+  <div class="step-side adv"><div class="step-num">A3</div></div>
+  <div class="step-body">
+    <div class="step-head">
+      <div class="step-title">🏰 Towny Advanced — Facciones y Reinos</div>
+      <span class="lv-adv">AVANZADO</span>
+    </div>
+    <div class="step-content">
+      Descargar desde <strong>github.com/TownyAdvanced/Towny</strong>. Requiere también <strong>Vault</strong> para la economía. Towny es el plugin más complejo de configurar, pero su config está muy bien documentada.
+    </div>
+    <div class="code">
+      <span class="c-comment"># Comandos básicos de Towny para jugadores</span><br><br>
+      <span class="c-cmd">/town new NombreDeTown</span>  <span class="c-comment"># fundar un pueblo</span><br>
+      <span class="c-cmd">/town invite Jugador</span>  <span class="c-comment"># invitar a alguien</span><br>
+      <span class="c-cmd">/town claim</span>  <span class="c-comment"># reclamar el chunk actual</span><br>
+      <span class="c-cmd">/nation new NombreNacion</span>  <span class="c-comment"># crear una nación</span><br>
+      <span class="c-cmd">/nation add TownName</span>  <span class="c-comment"># agregar pueblo a la nación</span><br><br>
+
+      <span class="c-comment"># plugins/Towny/settings/config.yml — valores clave</span><br>
+      <span class="c-val">town_block_size: 16</span>  <span class="c-comment"># un chunk por bloque de terreno</span><br>
+      <span class="c-val">town_default_taxpercent: 0.0</span>  <span class="c-comment"># impuesto inicial</span><br>
+      <span class="c-val">new_town_starting_plots: 8</span>  <span class="c-comment"># plots al fundar</span>
+    </div>
+    <div class="note info">📌 Integrar Towny con LuckPerms: cuando un jugador funda una nación, Skript puede escuchar el evento y darle el rango "Lord" automáticamente.</div>
+  </div>
+</div>
+
+<!-- A4 CC:Tweaked -->
+<div id="a4" class="step">
+  <div class="step-side adv"><div class="step-num">A4</div></div>
+  <div class="step-body">
+    <div class="step-head">
+      <div class="step-title">💻 ComputerCraft: Tweaked (Laboratorio Cyber)</div>
+      <span class="lv-adv">AVANZADO</span>
+    </div>
+    <div class="step-content">
+      CC:T es un mod Fabric/Forge, no un plugin. Para usarlo con un servidor Paper, necesitás la versión <strong>Forge en un servidor Mohist</strong> o configurar un servidor Fabric separado para el "mundo laboratorio".<br><br>
+      Descargar desde <strong>modrinth.com</strong> → "CC: Tweaked".
+    </div>
+    <div class="code">
+      <span class="c-comment"># Script Lua de ejemplo en una computadora CC:T</span><br>
+      <span class="c-comment"># Simula un "escaneo de red"</span><br><br>
+      <span class="c-val">-- Programa: scanner.lua</span><br>
+      <span class="c-val">print("Iniciando escaneo de red...")</span><br>
+      <span class="c-val">sleep(1)</span><br>
+      <span class="c-val">print("Hosts encontrados:")</span><br>
+      <span class="c-val">print("  192.168.1.1  [ROUTER]  OPEN")</span><br>
+      <span class="c-val">print("  192.168.1.5  [SERVER]  FILTERED")</span><br>
+      <span class="c-val">print("  192.168.1.10 [CLIENT]  OPEN")</span><br>
+      <span class="c-val">print("Escaneo completado.")</span>
+    </div>
+    <div class="step-content" style="margin-top:6px;">
+      Cada computadora CC:T tiene su propio filesystem. Los jugadores pueden: guardar y cargar programas Lua, conectar computadoras por cable de red, usar modems para comunicación inalámbrica in-game.
+    </div>
+    <div class="note ok">✦ Para el laboratorio de ciberseguridad: construir una sala con varias computadoras CC:T conectadas en red. Los estudiantes hackean la "red interna" del servidor resolviendo challenges en Lua.</div>
+  </div>
+</div>
+
+<!-- A5 Multiverse -->
+<div id="a5" class="step">
+  <div class="step-side adv"><div class="step-num">A5</div></div>
+  <div class="step-body">
+    <div class="step-head">
+      <div class="step-title">🌌 Multiverse — Dimensiones por Rango</div>
+      <span class="lv-adv">AVANZADO</span>
+    </div>
+    <div class="step-content">
+      Descargar <strong>Multiverse-Core</strong> y <strong>Multiverse-Portals</strong> desde spigotmc.org.
+    </div>
+    <div class="code">
+      <span class="c-comment"># Crear mundos desde consola del servidor</span><br>
+      <span class="c-cmd">/mv create lobby FLAT</span>  <span class="c-comment"># mundo plano para el hub</span><br>
+      <span class="c-cmd">/mv create escuela NORMAL</span>  <span class="c-comment"># mundo de cursos</span><br>
+      <span class="c-cmd">/mv create laboratorio FLAT</span>  <span class="c-comment"># mundo cyber</span><br>
+      <span class="c-cmd">/mv create rpg-mundo NORMAL</span>  <span class="c-comment"># mundo RPG</span><br><br>
+
+      <span class="c-comment"># Restringir acceso por permiso</span><br>
+      <span class="c-comment"># En plugins/Multiverse-Core/worlds.yml para cada mundo:</span><br>
+      <span class="c-val">access:</span><br>
+      <span class="c-val">&nbsp; - multiverse.access.laboratorio</span><br><br>
+
+      <span class="c-comment"># Dar ese permiso al rango "Estudiante" en LuckPerms</span><br>
+      <span class="c-cmd">lp group estudiante permission set multiverse.access.laboratorio true</span><br><br>
+
+      <span class="c-comment"># Crear portal de entrada</span><br>
+      <span class="c-comment"># Seleccionar área con WorldEdit, luego:</span><br>
+      <span class="c-cmd">/mvp create PortalLab</span><br>
+      <span class="c-cmd">/mvp select PortalLab</span><br>
+      <span class="c-cmd">/mvp modify dest w:laboratorio</span>
+    </div>
+  </div>
+</div>
+
+<!-- A6 IA -->
+<div id="a6" class="step">
+  <div class="step-side adv"><div class="step-num">A6</div></div>
+  <div class="step-body">
+    <div class="step-head">
+      <div class="step-title">🤖 Integración de IA (Chatbot real)</div>
+      <span class="lv-adv">AVANZADO</span>
+    </div>
+    <div class="step-content">
+      La forma más estable: <strong>DiscordSRV + bot de Discord con API de OpenAI/Claude</strong>.<br><br>
+      <strong>Paso 1:</strong> Instalar DiscordSRV (plugin Paper) y conectarlo a un servidor de Discord.<br>
+      <strong>Paso 2:</strong> Crear un bot de Discord en <em>discord.com/developers</em>.<br>
+      <strong>Paso 3:</strong> Programar el bot en Node.js para que escuche mensajes que empiecen con <code style="font-family:monospace;background:#0a0c18;padding:1px 4px">@asistente</code> y los envíe a la API de Claude o OpenAI.
+    </div>
+    <div class="code">
+      <span class="c-comment">// bot.js — Node.js (simplificado)</span><br>
+      <span class="c-comment">// Este bot recibe mensajes de Minecraft via DiscordSRV</span><br><br>
+      <span class="c-val">client.on('messageCreate', async (msg) => {</span><br>
+      <span class="c-val">&nbsp; if (!msg.content.startsWith('@asistente')) return;</span><br><br>
+      <span class="c-val">&nbsp; const pregunta = msg.content.replace('@asistente', '').trim();</span><br><br>
+      <span class="c-comment">&nbsp; // Llamar a la API de Claude o OpenAI</span><br>
+      <span class="c-val">&nbsp; const respuesta = await llamarIA(pregunta);</span><br><br>
+      <span class="c-comment">&nbsp; // La respuesta vuelve al canal de Discord</span><br>
+      <span class="c-comment">&nbsp; // DiscordSRV la reenvía al chat de Minecraft</span><br>
+      <span class="c-val">&nbsp; msg.reply(`🤖 ${respuesta}`);</span><br>
+      <span class="c-val">});</span>
+    </div>
+    <div class="note info">📌 El system prompt del bot debe incluir: reglas del servidor, lista de rangos, comandos disponibles, nombre del servidor. Así la IA responde como asistente oficial.</div>
+  </div>
+</div>
+
+<!-- A7 Chunky -->
+<div class="step">
+  <div class="step-side adv"><div class="step-num">A7</div></div>
+  <div class="step-body">
+    <div class="step-head">
+      <div class="step-title">🗺️ Pregenerar el mundo con Chunky</div>
+      <span class="lv-adv">AVANZADO</span>
+    </div>
+    <div class="step-content">
+      Antes de abrir el servidor al público, pregenerar los chunks elimina el 90% del lag por exploración. Instalar <strong>Chunky</strong> desde modrinth.com.
+    </div>
+    <div class="code">
+      <span class="c-comment"># Generar un radio de 3000 bloques del mundo principal</span><br>
+      <span class="c-comment"># Esto puede tardar 20-60 minutos según el hardware</span><br>
+      <span class="c-cmd">/chunky radius 3000</span><br>
+      <span class="c-cmd">/chunky world world</span>  <span class="c-comment"># nombre del mundo</span><br>
+      <span class="c-cmd">/chunky start</span><br><br>
+
+      <span class="c-comment"># Ver progreso</span><br>
+      <span class="c-cmd">/chunky progress</span><br><br>
+
+      <span class="c-comment"># Hacer lo mismo para cada mundo</span><br>
+      <span class="c-cmd">/chunky world rpg-mundo</span><br>
+      <span class="c-cmd">/chunky radius 5000</span><br>
+      <span class="c-cmd">/chunky start</span>
+    </div>
+    <div class="note ok">✦ Pregenerar es una de las mejores inversiones de tiempo antes del lanzamiento. Un mundo de 3000 bloques de radio ocupa ~1-2GB en disco.</div>
+  </div>
+</div>
+
+<!-- A8 SkinsRestorer -->
+<div class="step">
+  <div class="step-side adv"><div class="step-num">A8</div></div>
+  <div class="step-body">
+    <div class="step-head">
+      <div class="step-title">👤 SkinsRestorer — Cambio de Skin</div>
+      <span class="lv-adv">AVANZADO</span>
+    </div>
+    <div class="step-content">
+      Descargar desde <strong>spigotmc.org</strong> → "SkinsRestorer". Instalar como plugin normal. Funciona out-of-the-box sin configuración adicional.
+    </div>
+    <div class="code">
+      <span class="c-comment"># Comandos en el juego</span><br>
+      <span class="c-cmd">/skin set Notch</span>  <span class="c-comment"># copiar skin de una cuenta Mojang</span><br>
+      <span class="c-cmd">/skin url https://i.imgur.com/XXX.png</span>  <span class="c-comment"># skin desde URL</span><br>
+      <span class="c-cmd">/skin clear</span>  <span class="c-comment"># volver a la skin por defecto</span><br>
+      <span class="c-cmd">/skin update</span>  <span class="c-comment"># actualizar caché de la skin</span><br><br>
+
+      <span class="c-comment"># Skins exclusivas por rango (con Skript)</span><br>
+      <span class="c-val">command /skin-staff:</span><br>
+      <span class="c-val">&nbsp; trigger:</span><br>
+      <span class="c-val">&nbsp;&nbsp;&nbsp; if player has permission "rank.staff":</span><br>
+      <span class="c-val">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; execute console command "skin set %player% StaffSkinNick"</span><br>
+      <span class="c-val">&nbsp;&nbsp;&nbsp; else:</span><br>
+      <span class="c-val">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; send "&amp;cNecesitás rango Staff para esta skin."</span>
+    </div>
+  </div>
+</div>
+
+<!-- A9 BetonQuest -->
+<div class="step">
+  <div class="step-side adv"><div class="step-num">A9</div></div>
+  <div class="step-body">
+    <div class="step-head">
+      <div class="step-title">🎓 BetonQuest — Sistema de Cursos</div>
+      <span class="lv-adv">AVANZADO</span>
+    </div>
+    <div class="step-content">
+      BetonQuest es el plugin más potente para crear misiones y cursos. Tiene su propio lenguaje de configuración en YAML. Descargar desde <strong>betonquest.org</strong>.
+    </div>
+    <div class="code">
+      <span class="c-comment"># Estructura básica de un curso en BetonQuest</span><br>
+      <span class="c-comment"># plugins/BetonQuest/default/objectives.yml</span><br><br>
+      <span class="c-val">leer_libro_1:</span><br>
+      <span class="c-val">&nbsp; instruction: 'block LOG 1 events:completar_lectura'</span><br><br>
+      <span class="c-comment"># plugins/BetonQuest/default/events.yml</span><br>
+      <span class="c-val">completar_lectura:</span><br>
+      <span class="c-val">&nbsp; instruction: 'permission add estudiante'</span><br><br>
+      <span class="c-val">dar_certificado:</span><br>
+      <span class="c-val">&nbsp; instruction: 'give certificado_nivel1 1'</span><br><br>
+      <span class="c-comment"># plugins/BetonQuest/default/conditions.yml</span><br>
+      <span class="c-val">es_visitante:</span><br>
+      <span class="c-val">&nbsp; instruction: 'permission essentials.visitante'</span>
+    </div>
+    <div class="note info">📌 BetonQuest tiene documentación muy completa en betonquest.org/v2/. La curva de aprendizaje es alta pero es el sistema más poderoso disponible para cursos in-game.</div>
+  </div>
+</div>
+
+<!-- A10 ORDEN DE INSTALACIÓN -->
+<div class="step">
+  <div class="step-side adv"><div class="step-num">A10</div></div>
+  <div class="step-body">
+    <div class="step-head">
+      <div class="step-title">📋 Orden correcto de instalación de todos los plugins</div>
+      <span class="lv-adv">AVANZADO</span>
+    </div>
+    <div class="step-content">
+      El orden importa porque algunos plugins dependen de otros para cargar. Instalar en este orden, reiniciando el servidor después de cada grupo:
+    </div>
+    <div class="code">
+      <span class="c-comment"># GRUPO 1 — APIs base (instalar juntos, reiniciar)</span><br>
+      <span class="c-val">Vault.jar</span><br>
+      <span class="c-val">ProtocolLib.jar</span><br>
+      <span class="c-val">PlaceholderAPI.jar</span><br><br>
+
+      <span class="c-comment"># GRUPO 2 — Seguridad y permisos (reiniciar)</span><br>
+      <span class="c-val">AuthMe.jar</span><br>
+      <span class="c-val">LuckPerms-Bukkit.jar</span><br><br>
+
+      <span class="c-comment"># GRUPO 3 — Comandos base (reiniciar)</span><br>
+      <span class="c-val">EssentialsX.jar</span><br>
+      <span class="c-val">EssentialsXChat.jar</span><br>
+      <span class="c-val">EssentialsXSpawn.jar</span><br>
+      <span class="c-val">Skript.jar</span><br><br>
+
+      <span class="c-comment"># GRUPO 4 — Construcción y mundo (reiniciar)</span><br>
+      <span class="c-val">FastAsyncWorldEdit.jar</span><br>
+      <span class="c-val">WorldGuard.jar</span><br>
+      <span class="c-val">Multiverse-Core.jar</span><br>
+      <span class="c-val">Multiverse-Portals.jar</span><br><br>
+
+      <span class="c-comment"># GRUPO 5 — Visual (reiniciar)</span><br>
+      <span class="c-val">TAB.jar</span><br>
+      <span class="c-val">DiscordSRV.jar</span><br>
+      <span class="c-val">SkinsRestorer.jar</span><br><br>
+
+      <span class="c-comment"># GRUPO 6 — RPG y gameplay (reiniciar)</span><br>
+      <span class="c-val">mcMMO.jar</span><br>
+      <span class="c-val">Towny.jar</span><br>
+      <span class="c-val">MythicMobs.jar</span><br>
+      <span class="c-val">BetonQuest.jar</span><br>
+      <span class="c-val">DeluxeMenus.jar</span><br><br>
+
+      <span class="c-comment"># GRUPO 7 — Optimización (último)</span><br>
+      <span class="c-val">Spark.jar</span><br>
+      <span class="c-val">Chunky.jar</span><br>
+      <span class="c-val">ClearLagg.jar</span>
+    </div>
+    <div class="note danger">🔴 Nunca instalar FAWE y WorldEdit normal juntos. Elegir solo uno. Para este servidor usar FAWE.</div>
+  </div>
+</div>
+
+</div><!-- /steps -->
+</div><!-- /wrap avanzado -->
+
+<!-- CHECKLIST FINAL -->
+<div class="divider"></div>
+<div class="wrap" style="padding-bottom:40px;">
+  <div class="phase-banner">
+    <div>
+      <div class="ph-badge" style="background:#0a0810;border:1px solid #2a1a50;color:var(--purple)">Checklist Final</div>
+      <div class="ph-title">¿Está listo para abrir al público?</div>
+    </div>
+    <div class="ph-bar"></div>
+  </div>
+
+  <div class="grid">
+    <div class="mcard">
+      <div class="mcard-title" style="color:var(--basic)">✅ Básico completado</div>
+      <div class="checklist">
+        <div class="check-item"><div class="check-box">✓</div>Java 21 instalado</div>
+        <div class="check-item"><div class="check-box">✓</div>Paper 1.21.1 corriendo</div>
+        <div class="check-item"><div class="check-box">✓</div>Script de inicio con Aikar's Flags</div>
+        <div class="check-item"><div class="check-box">✓</div>EULA aceptado</div>
+        <div class="check-item"><div class="check-box">✓</div>server.properties configurado</div>
+        <div class="check-item"><div class="check-box">✓</div>Puerto 25565 abierto en firewall</div>
+        <div class="check-item"><div class="check-box">✓</div>Se puede conectar desde el cliente</div>
+      </div>
+    </div>
+    <div class="mcard">
+      <div class="mcard-title" style="color:var(--mid)">✅ Medio completado</div>
+      <div class="checklist">
+        <div class="check-item"><div class="check-box">✓</div>AuthMe instalado y configurado</div>
+        <div class="check-item"><div class="check-box">✓</div>LuckPerms con grupos y herencia</div>
+        <div class="check-item"><div class="check-box">✓</div>EssentialsX con spawn y chat</div>
+        <div class="check-item"><div class="check-box">✓</div>WorldGuard con regiones protegidas</div>
+        <div class="check-item"><div class="check-box">✓</div>FAWE funcionando</div>
+        <div class="check-item"><div class="check-box">✓</div>PlaceholderAPI + TAB mostrando rangos</div>
+        <div class="check-item"><div class="check-box">✓</div>Skript con scripts base</div>
+      </div>
+    </div>
+    <div class="mcard">
+      <div class="mcard-title" style="color:var(--adv)">✅ Avanzado completado</div>
+      <div class="checklist">
+        <div class="check-item"><div class="check-box">✓</div>Voice Chat activo y testeado</div>
+        <div class="check-item"><div class="check-box">✓</div>McMMO con skills configuradas</div>
+        <div class="check-item"><div class="check-box">✓</div>Towny con mundo RPG activo</div>
+        <div class="check-item"><div class="check-box">✓</div>Multiverse con dimensiones por rango</div>
+        <div class="check-item"><div class="check-box">✓</div>SkinsRestorer funcionando</div>
+        <div class="check-item"><div class="check-box">✓</div>Chunky: mundo pregenerado</div>
+        <div class="check-item"><div class="check-box">✓</div>Spark instalado para diagnóstico</div>
+      </div>
+    </div>
+    <div class="mcard">
+      <div class="mcard-title" style="color:var(--purple)">🚀 Antes de abrir al público</div>
+      <div class="checklist">
+        <div class="check-item"><div class="check-box" style="border-color:#3a2060">→</div>Probar registro y login como jugador nuevo</div>
+        <div class="check-item"><div class="check-box" style="border-color:#3a2060">→</div>Verificar que rangos dan/quitan permisos correctamente</div>
+        <div class="check-item"><div class="check-box" style="border-color:#3a2060">→</div>Construir el lobby/spawn principal</div>
+        <div class="check-item"><div class="check-box" style="border-color:#3a2060">→</div>Configurar zona de bienvenida con NPC</div>
+        <div class="check-item"><div class="check-box" style="border-color:#3a2060">→</div>Hacer backup del servidor antes del launch</div>
+        <div class="check-item"><div class="check-box" style="border-color:#3a2060">→</div>Monitorear con Spark las primeras horas</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Guía Completa de Servidor Minecraft · Java 1.21.1 · Paper · Básico → Avanzado
+</footer>
+
+</body>
+</html>
+
